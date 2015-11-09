@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="../lib/angular.min.js"></script>
+    <script type="text/javascript" src="../lib/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../ENV.js"></script>
+    <script type="text/javascript" src="app.js"></script>
+</head>
+<body>
+    <ul id="ng-list" ng-app="list" ng-controller="ListCtrl">
+        <li ng-repeat="item in items">ng: {{item.t}}</li>
+    </ul>
+</body>
+</html>
