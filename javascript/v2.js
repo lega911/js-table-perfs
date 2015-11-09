@@ -22,7 +22,7 @@ $(function() {
       var i, li, text;
       for (i = 0; i < n; i++) {
           li = document.createElement('li');
-          text = document.createTextNode('vj: ' + i);
+          text = document.createTextNode('jj: ' + i);
           li.appendChild(text);
           ul.appendChild(li);
           list.push(text);
@@ -34,7 +34,7 @@ $(function() {
   function update(n, callback) {
       var i;
       for (i = 0; i < n; i++) {
-          list[i].textContent = 'vj: ' + i + ' ' + i;
+          list[i].textContent = 'jj: ' + i + ' ' + i;
       };
       callback();
   }

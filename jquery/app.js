@@ -16,7 +16,7 @@ function jqFill(n, callback) {
     var i, li,
     ul = $("#jq-list");
     for (i = 0; i < n; i += 1) {
-        li = '<li>jq: <span id="jq-list-' + i + '">' + i + '</span></li>';
+        li = '<li>jj: <span id="jq-list-' + i + '">' + i + '</span></li>';
         ul.append(li);
     };
     callback()
