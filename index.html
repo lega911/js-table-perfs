@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="lib/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="lib/alight_0.10.last.min.js"></script>
+    <script type="text/javascript" src="ENV.js"></script>
+    <script type="text/javascript" src="library-list.js"></script>
+    <script type="text/javascript" src="index.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row">
+            <h1>JavaScript table Test</h1>
+        </div>
+        <div class="row">
+            <table class="table table-bordered">
+                <tr>
+                    <th>Name</th>
+                    <th>Fill time</th>
+                    <th>Update time</th>
+                </tr>
+                <tr al-repeat="it in list">
+                    <td>
+                        <a href="{{it.path}}">{{it.name}}</a>
+                    </td>
+                    <td>{{getTime('fill', it.code)}}</td>
+                    <td>{{getTime('update', it.code)}}</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+        
+</body>
+</html>
