@@ -9,7 +9,7 @@ $(function() {
   
         var rows = data.map(function(row) {
           return (
-            React.DOM.li(null, 're: ' + row)
+            React.DOM.li(null, 'jj: ' + row)
           );
         });
   

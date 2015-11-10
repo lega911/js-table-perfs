@@ -17,7 +17,7 @@ var MatreshkaCollection = MK.Class({
         onItemRender: function(item, evt) {
             MK.bindNode(item, 'value', evt.node, {
                     setValue: function(v) {
-                            this.textContent = 'mk: ' + v;
+                            this.textContent = 'jj: ' + v;
                     }
             })
         }

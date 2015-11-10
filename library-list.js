@@ -10,5 +10,6 @@ ENV.libraryList = [
     { code: 'matreshka', name: 'Matreshka.js', path: './matreshka/' },
     { code: 'basisjs', name: 'Basis.js', path: './basisjs/' },
     { code: 'ractivejs', name: 'Ractive.js', path: './ractivejs/' },    
-    { code: 'reactjs', name: 'React.js', path: './reactjs/' }
+    { code: 'reactjs', name: 'React.js', path: './reactjs/' },
+    { code: 'blocksjs', name: 'Blocks.js', path: './blocksjs/' }
 ];

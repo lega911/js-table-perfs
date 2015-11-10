@@ -2,21 +2,15 @@
 <html>
 <head>
     <script type="text/javascript" src="../lib/jquery-1.9.1.min.js"></script>
-    <script type="text/javascript" src="../lib/ractive.min.js"></script>
+    <script type="text/javascript" src="../lib/blocks.min.js"></script>
     <script type="text/javascript" src="../ENV.js"></script>
     <script type="text/javascript" src="app.js"></script>
 </head>
 <body>
-
-    <div id="ractive"></div>
-    
-    <script id="ractive_template" type="text/ractive">
-<ul>
-  {{#each list}}
-  <li>jj: {{t}}</li>
-  {{/each}}
-</ul>      
-    </script>
-
+    <div data-query="view(Blocksjs)">
+        <ul data-query="each(products)">
+            <li>jj: {{name}}</li>
+        </ul>
+    </div>
 </body>
 </html>
