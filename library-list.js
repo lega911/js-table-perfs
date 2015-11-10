@@ -6,6 +6,6 @@ ENV.libraryList = [
     { code: 'js2', name: 'JavaScript + DocumentFragment', path: './javascript/v2.html' },
 
     { name: 'Matreshka.js', path: './matreshka/' },
-    { name: 'Knockout.js', path: './knockoutjs/' },
+    { code: 'knockoutjs', name: 'Knockout.js', path: './knockoutjs/' },
     { name: 'React.js', path: './reactjs/' }
 ];
