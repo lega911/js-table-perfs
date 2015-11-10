@@ -4,8 +4,9 @@ ENV.libraryList = [
     { code: 'jquery', name: 'jQuery', path: './jquery/' },
     { code: 'js', name: 'JavaScript', path: './javascript/' },
     { code: 'js2', name: 'JavaScript + DocumentFragment', path: './javascript/v2.html' },
-
+    { code: 'knockoutjs', name: 'Knockout.js', path: './knockoutjs/' },    
+    { code: 'atom', name: '$jin.atom', path: './atom/' },
+    
     { name: 'Matreshka.js', path: './matreshka/' },
-    { code: 'knockoutjs', name: 'Knockout.js', path: './knockoutjs/' },
     { name: 'React.js', path: './reactjs/' }
 ];
