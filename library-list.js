@@ -8,6 +8,7 @@ ENV.libraryList = [
     { code: 'atom', name: '$jin.atom', path: './atom/' },
     { code: 'mithril', name: 'Mithril', path: './mithril/' },
     { code: 'matreshka', name: 'Matreshka.js', path: './matreshka/' },
+    { code: 'basisjs', name: 'Basis.js', path: './basisjs/' },
     
     { name: 'React.js', path: './reactjs/' }
 ];
