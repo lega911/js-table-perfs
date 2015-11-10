@@ -7,7 +7,7 @@ ENV.libraryList = [
     { code: 'knockoutjs', name: 'Knockout.js', path: './knockoutjs/' },    
     { code: 'atom', name: '$jin.atom', path: './atom/' },
     { code: 'mithril', name: 'Mithril', path: './mithril/' },
-
-    { name: 'Matreshka.js', path: './matreshka/' },
+    { code: 'matreshka', name: 'Matreshka.js', path: './matreshka/' },
+    
     { name: 'React.js', path: './reactjs/' }
 ];
