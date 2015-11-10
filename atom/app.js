@@ -1,4 +1,4 @@
-$jin.sample.strings( '<ul my-app-list="">{items}</ul><li my-app-item="">atom: <span my-app-item-val="">{val}</span></li>' )
+$jin.sample.strings( '<ul my-app-list="">{items}</ul><li my-app-item="">jj: <span my-app-item-val="">{val}</span></li>' )
 
 $jin.klass({ '$my.app.list': [ '$jin.view' ] })
 $jin.atom.prop.list({ '$my.app.list..items': {} })
