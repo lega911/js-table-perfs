@@ -1,10 +1,15 @@
 (function(){
     window.ENV = {};
-    document.addEventListener('DOMContentLoaded', run);
+
+    var setTimeout = window.setTimeout;
+    var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+                                window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+    //document.addEventListener('DOMContentLoaded', run);
 
     var app;
     ENV.append = function(option) {
         app = option;
+        setTimeout(run, 500);
     };
 
     function time() {
@@ -28,11 +33,7 @@
     };
 
     function run() {
-        if(!app) return;
         var displayResult = buildBoard();
-        var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
-                                    window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-
         var count = 10000;
         var fillDuration, updateDuration;
         var total = { fill: 0, update: 0, count: 0 };
