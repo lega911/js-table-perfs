@@ -1,33 +1,40 @@
 
-alight.controllers.main = function(scope) {
+alight.directives.ctrl.main = function(changeDetector) {
+    var scope = changeDetector.scope;
+    function redraw() {
+        changeDetector.scan()
+    }
+
     scope.items = [];
-    scope.clear = function(callback) {
+    function clear(callback) {
         scope.items = [];
-        scope.$scan();
+        redraw();
         callback();
     }
-    scope.fill = function (n, callback) {
+
+    function fill(n, callback) {
         var i;
         for (i = 0; i < n; i += 1) {
             scope.items.push({ t:i });
         }
-        scope.$scan();
+        redraw();
         callback();
-    };
-    scope.update = function (n, callback) {
+    }
+
+    function update(n, callback) {
         var i,
         items = scope.items;
         for (i = 0; i < n; i += 1) {
             items[i].t += ' ' + items[i].t;
         }
-        scope.$scan();
+        redraw();
         callback();
-    };
+    }
     
     ENV.append({
         code: 'angular-light',
-        clear: scope.clear,
-        fill: scope.fill,
-        update: scope.update
+        clear: clear,
+        fill: fill,
+        update: update
     })
 };
