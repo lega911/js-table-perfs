@@ -5,7 +5,8 @@ $(function() {
     code: 'basisjs',
     clear: basisClear,
     fill: basisFill,
-    update: basisUpdate
+    update: basisUpdate,
+    insert: basisInsert
   });
   
   
@@ -36,6 +37,12 @@ $(function() {
           node.val += ' ' + node.val;
           node.updateBind('val');
       });
+      
+      callback();
+  }
+  
+  function basisInsert(n, callback){
+      basisList.insertBefore({val: 'xx'}, basisList.childNodes[n]);
       
       callback();
   }

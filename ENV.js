@@ -20,13 +20,16 @@
     function buildBoard() {
         var div = document.createElement('div');
         document.body.insertBefore(div, document.body.firstChild);
-        var fillResult=0, updateResult=0;
+        var fillResult=0, updateResult=0, insertResult=0;
         displayResult();
 
-        function displayResult(fill, update) {
+        function displayResult(fill, update, insert) {
             if(fill) fillResult = fill;
             if(update) updateResult = update;
-            div.innerHTML = 'Fill: <b>' + fillResult.toFixed(0) + 'ms</b>, Update: <b>' + updateResult.toFixed(0) + 'ms</b>';
+            if(insert) insertResult = insert;
+            div.innerHTML = 'Fill: <b>' + fillResult.toFixed(0) + 'ms</b>, Update: <b>' +
+                updateResult.toFixed(0) + 'ms</b>, Insert: <b>' +
+                insertResult.toFixed(0) + 'ms</b>'
         }
 
         return displayResult;
@@ -35,8 +38,8 @@
     function run() {
         var displayResult = buildBoard();
         var count = 10000;
-        var fillDuration, updateDuration;
-        var total = { fill: 0, update: 0, count: 0 };
+        var fillDuration=0, updateDuration=0, insertDuration=0;
+        var total = { fill: 0, update: 0, insert: 0, count: 0 };
 
         next();
 
@@ -64,13 +67,25 @@
             }));
         }
 
+        function takeInsert(callback) {
+            var start = time();
+            if(!app.insert) return callback();
+            app.insert(20, nextTick(0, function() {
+                insertDuration = time() - start;
+                displayResult(0, 0, insertDuration);
+                callback()
+            }));
+        }
+
         function saveResult() {
             total.fill += fillDuration;
             total.update += updateDuration;
+            total.insert += insertDuration;
             total.count++
 
             localStorage.setItem('fill:' + app.code, (total.fill/total.count).toFixed(0));
             localStorage.setItem('update:' + app.code, (total.update/total.count).toFixed(0));
+            localStorage.setItem('insert:' + app.code, (total.insert/total.count).toFixed(0));
         };
 
         function next() {
@@ -78,10 +93,14 @@
                 requestAnimationFrame(function() {
                     takeFill(nextTick(1000, function() {
                         requestAnimationFrame(function() {
-                            takeUpdate(function() {
-                                saveResult();
-                                setTimeout(next, 2000)
-                            })
+                            takeUpdate(nextTick(1000, function() {
+                                requestAnimationFrame(function() {
+                                    takeInsert(function() {
+                                        saveResult();
+                                        setTimeout(next, 2000)
+                                    })
+                                });
+                            }))
                         })
                     }));
                 })

@@ -31,10 +31,17 @@ alight.directives.ctrl.main = function(changeDetector) {
         callback();
     }
     
+    function insert(n, callback) {
+        scope.items.splice(n, 0, { t: 'xx' });
+        redraw();
+        callback();
+    }
+    
     ENV.append({
         code: 'angular-light',
         clear: clear,
         fill: fill,
-        update: update
+        update: update,
+        insert: insert
     })
 };

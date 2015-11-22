@@ -16,6 +16,9 @@ ngApp.controller('ListCtrl', ['$scope', function ($scope) {
             items[i].t += ' ' + items[i].t;
         }
     };
+    $scope.insert = function (n) {
+        $scope.items.splice(n, 0, { t:'xx' })
+    };
 }]);
 ngApp.fill = function (n, callback) {
     var scope = angular.element($('#ng-list')).scope();
@@ -31,6 +34,13 @@ ngApp.update = function (n, callback) {
     });
     callback();
 };
+ngApp.insert = function (n, callback) {
+    var scope = angular.element($('#ng-list')).scope();
+    scope.$apply(function () {
+        scope.insert(n);
+    });
+    callback();
+};
 ngApp.clear = function (callback) {
     var scope = angular.element($('#ng-list')).scope();
     scope.$apply(function () {
@@ -43,5 +53,6 @@ ENV.append({
     code: 'angularjs',
     clear: ngApp.clear,
     fill: ngApp.fill,
-    update: ngApp.update
+    update: ngApp.update,
+    insert: ngApp.insert
 })

@@ -18,7 +18,8 @@ var AppComponent = ng.
           code: 'angularjs2',
           clear: clear,
           fill: fill,
-          update: update
+          update: update,
+          insert: insert
       });
 
       function clear(callback) {
@@ -42,6 +43,13 @@ var AppComponent = ng.
         for (i = 0; i < n; i += 1) {
             items[i].t += ' ' + items[i].t;
         }
+
+        appZone.run(function(){});
+        callback();
+      };
+
+      function insert(n, callback) {
+        scope.items.splice(n, 0, { t:'xx' });
 
         appZone.run(function(){});
         callback();

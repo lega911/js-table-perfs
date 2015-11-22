@@ -19,6 +19,7 @@
                     <th>Name</th>
                     <th>Fill time</th>
                     <th>Update time</th>
+                    <th>Insert time</th>
                 </tr>
                 <tr al-repeat="it in list">
                     <td>
@@ -26,6 +27,7 @@
                     </td>
                     <td>{{getTime('fill', it.code)}}</td>
                     <td>{{getTime('update', it.code)}}</td>
+                    <td>{{getTime('insert', it.code)}}</td>
                 </tr>
 
             </table>

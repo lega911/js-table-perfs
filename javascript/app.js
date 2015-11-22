@@ -9,7 +9,8 @@ $(function() {
       code: 'js',
       clear: clear,
       fill: fill,
-      update: update
+      update: update,
+      insert: insert
   })
 
   function clear(callback) {
@@ -37,6 +38,15 @@ $(function() {
           list[i].textContent = 'jj: ' + i + ' ' + i;
       };
       callback();
+  };
+
+  function insert(n, callback) {
+    var li = document.createElement('li');
+    li.appendChild(document.createTextNode('jj: xx'));
+
+    var base = list[n].parentNode;    
+    base.parentNode.insertBefore(li, base);
+    callback()
   }
 
 })

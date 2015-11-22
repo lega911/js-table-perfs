@@ -5,7 +5,8 @@ ENV.append({
   code: 'matreshka',
   clear: function(callback) { matreshkaCollection && matreshkaCollection.recreate(); callback(); },
   fill: mkFill,
-  update: mkUpdate
+  update: mkUpdate,
+  insert: mkInsert
 });
 
 var MatreshkaCollection = MK.Class({ 
@@ -39,5 +40,10 @@ function mkUpdate(n, callback) {
     for (i = 0; i < n; i += 1) {
         matreshkaCollection[ i ].value = i + ' ' + i;
     }
+    callback();
+}
+
+function mkInsert(n, callback) {
+    matreshkaCollection.splice(n, 0, { value: 'xx' })
     callback();
 }
