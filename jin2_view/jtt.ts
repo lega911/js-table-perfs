@@ -1,7 +1,28 @@
 class $jin2_demo_jtt extends $jin2_view {
 	
 	@$jin2_lazy
-	static widget( id : string ) { return new this() }
+	static widget( id : string ) {
+		return new this()
+	}
+
+	@$jin2_lazy
+	items() {
+		return new $jin2_atom<$jin2_demo_jtt_item[]>( prev => [] )
+	}
+
+	child() {
+		return this.items()
+	}
+
+	tagName() {
+		return { get : () => 'ul' }
+	}
+	
+	@$jin2_lazy
+	item( id ) { 
+		return new $jin2_demo_jtt_item 
+	}
+
 
 	doClear( done ) {
 		this.items().set([])
@@ -31,43 +52,28 @@ class $jin2_demo_jtt extends $jin2_view {
 		this.items().mutate( prev => {
 			prev.splice( index , 0 , this.item( 'xx' ) )
 			return prev
+			//return prev.slice( 0 , index ).concat( this.item( 'xx' ) ).concat( prev.slice( index ) )
 		})
 		this.items().notify()
 		$jin2_atom.induce()
 		done()
 	}
 
-	@$jin2_lazy
-	items() { return new $jin2_atom<$jin2_demo_jtt_row[]>({
-		pull_ : prev => []
-	}) }
-
-	child() { return this.items() }
-
-	@$jin2_lazy
-	tagName() { return new $jin2_prop({
-		pull_ : () => 'ul'
-	}) }
-	
-	@$jin2_lazy
-	item( id ) { return new $jin2_demo_jtt_row() }
 }
 
-class $jin2_demo_jtt_row extends $jin2_view {
+class $jin2_demo_jtt_item extends $jin2_view {
 
 	@$jin2_lazy
-	val() { return new $jin2_atom<string>({
-		pull_ : prev => '' + this.objectId
-	}) }
+	val() {
+		return new $jin2_atom( prev => '' + this.objectId )
+	}
 	
-	@$jin2_lazy
-	tagName() { return new $jin2_prop({
-		pull_ : () => 'li'
-	}) }
+	tagName() {
+		return { get : () => 'li' }
+	}
 	
-	@$jin2_lazy
-	child() { return new $jin2_prop<any[]>({
-		pull_ : prev => [ 'jj: ' + this.val().get() ],
-	}) }
+	child() {
+		return { get : () => [ 'jj: ' + this.val().get() ] }
+	}
 
 }
