@@ -259,28 +259,31 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+var Map;
+var Set;
 var $jin2_atom = (function (_super) {
     __extends($jin2_atom, _super);
     function $jin2_atom(pull, put) {
         _super.call(this);
         this.value_ = void 0;
         this.error = $jin2_atom.obsolete;
+        this.masters = null;
         this.mastersDeep = 0;
-        this.slavesCount = 0;
+        this.slaves = null;
         if (pull)
             this.pull_ = pull;
         if (put)
             this.put_ = put;
     }
-    $jin2_atom.prototype.get_ = function (value) { return value; };
     $jin2_atom.prototype.pull_ = function (prev) { throw $jin2_atom.wait; };
     $jin2_atom.prototype.norm_ = function (next, prev) { return next; };
     $jin2_atom.prototype.put_ = function (next, prev) { return next; };
+    $jin2_atom.prototype.notify_ = function (next, prev) { };
     $jin2_atom.prototype.fail_ = function (error) { return void 0; };
     $jin2_atom.prototype.reap_ = function () { return true; };
     $jin2_atom.prototype.reap = function () {
-        $jin2_atom._planReap[this.objectPath] = null;
-        if (this.slavesCount)
+        $jin2_atom._planReap.delete(this);
+        if (this.slaves)
             return;
         if (this.reap_()) {
             this.destroy();
@@ -289,7 +292,7 @@ var $jin2_atom = (function (_super) {
         return false;
     };
     $jin2_atom.prototype.destroy = function () {
-        $jin2_atom._planReap[this.objectPath] = null;
+        $jin2_atom._planReap.delete(this);
         this.disobeyAll();
         _super.prototype.destroy.call(this);
     };
@@ -297,7 +300,8 @@ var $jin2_atom = (function (_super) {
         var slave = $jin2_atom.stack[$jin2_atom.stack.length - 1];
         if (!slave)
             return;
-        $jin2_atom.link(this, slave);
+        slave.obey(this);
+        this.lead(slave);
     };
     $jin2_atom.prototype.get = function () {
         this.touch();
@@ -305,11 +309,15 @@ var $jin2_atom = (function (_super) {
             this.pull();
         if (this.error)
             throw this.error;
-        return this.get_(this.value_);
+        return this.value_;
     };
     $jin2_atom.prototype.pull = function () {
-        var oldMasters = this.masters;
-        this.masters = null;
+        var _this = this;
+        if (this.masters) {
+            this.masters.forEach(function (linked, master) {
+                _this.masters.set(master, false);
+            });
+        }
         this.mastersDeep = 0;
         this.error = $jin2_atom.wait;
         var index = $jin2_atom.stack.length;
@@ -318,15 +326,17 @@ var $jin2_atom = (function (_super) {
         $jin2_atom.stack.length = index;
         if (next !== void 0)
             this.push(next);
-        if (oldMasters)
-            for (var masterName in oldMasters) {
-                var master = oldMasters[masterName];
-                if (!master)
-                    continue;
-                if (this.masters && this.masters[masterName])
-                    continue;
-                master.dislead(this);
-            }
+        if (this.masters) {
+            var masters = this.masters;
+            this.masters.forEach(function (linked, master) {
+                if (linked)
+                    return;
+                masters.delete(master);
+                master.dislead(_this);
+            });
+            if (!masters.size)
+                this.masters = null;
+        }
         return this.value_;
     };
     $jin2_atom.prototype.push = function (next) {
@@ -360,13 +370,8 @@ var $jin2_atom = (function (_super) {
         return void 0;
     };
     $jin2_atom.prototype.notifySlaves = function () {
-        if (this.slavesCount) {
-            for (var slaveName in this.slaves) {
-                var slave = this.slaves[slaveName];
-                if (!slave)
-                    continue;
-                slave.update();
-            }
+        if (this.slaves) {
+            this.slaves.forEach(function (slave) { return slave.update(); });
         }
     };
     $jin2_atom.prototype.notify = function (prev) {
@@ -387,69 +392,49 @@ var $jin2_atom = (function (_super) {
         $jin2_atom.actualize(this);
     };
     $jin2_atom.prototype.lead = function (slave) {
-        var slaveName = slave.objectPath;
-        if (this.slaves) {
-            if (this.slaves[slaveName])
-                return false;
-        }
-        else {
-            this.slaves = {};
-        }
-        this.slaves[slaveName] = slave;
-        delete $jin2_atom._planReap[this.objectPath];
-        this.slavesCount++;
-        return true;
+        if (!this.slaves)
+            this.slaves = new Set;
+        this.slaves.add(slave);
+        $jin2_atom._planReap.delete(this);
     };
     $jin2_atom.prototype.dislead = function (slave) {
-        var slaveName = slave.objectPath;
-        if (!this.slaves[slaveName])
+        if (!this.slaves)
             return;
-        this.slaves[slaveName] = null;
-        if (!--this.slavesCount) {
+        this.slaves.delete(slave);
+        if (!this.slaves.size) {
+            this.slaves = null;
             $jin2_atom.collect(this);
         }
     };
     $jin2_atom.prototype.disleadAll = function () {
-        if (!this.slavesCount)
+        var _this = this;
+        if (!this.slaves)
             return;
-        for (var slaveName in this.slaves) {
-            var slave = this.slaves[slaveName];
-            if (!slave)
-                continue;
-            slave.disobey(this);
-        }
+        this.slaves.forEach(function (slave) { return slave.disobey(_this); });
         this.slaves = null;
-        this.slavesCount = 0;
         $jin2_atom.collect(this);
     };
     $jin2_atom.prototype.obey = function (master) {
-        var masters = this.masters;
-        if (!masters)
-            masters = this.masters = {};
-        var masterName = master.objectPath;
-        if (masters[masterName])
-            return false;
-        masters[masterName] = master;
+        if (!this.masters)
+            this.masters = new Map;
+        this.masters.set(master, true);
         var masterDeep = master.mastersDeep;
         if (this.mastersDeep <= masterDeep) {
             this.mastersDeep = masterDeep + 1;
         }
-        return true;
     };
     $jin2_atom.prototype.disobey = function (master) {
         if (!this.masters)
             return;
-        this.masters[master.objectPath] = null;
+        this.masters.delete(master);
+        if (!this.masters.size)
+            this.masters = null;
     };
     $jin2_atom.prototype.disobeyAll = function () {
-        if (!this.mastersDeep)
+        var _this = this;
+        if (!this.masters)
             return;
-        for (var masterName in this.masters) {
-            var master = this.masters[masterName];
-            if (!master)
-                continue;
-            master.dislead(this);
-        }
+        this.masters.forEach(function (linked, master) { return master.dislead(_this); });
         this.masters = null;
         this.mastersDeep = 0;
     };
@@ -521,11 +506,6 @@ var $jin2_atom = (function (_super) {
     $jin2_atom.prototype.catch = function (fail) {
         return this.then(null, fail);
     };
-    $jin2_atom.link = function (master, slave) {
-        if (slave.obey(master)) {
-            master.lead(slave);
-        }
-    };
     $jin2_atom.actualize = function (atom) {
         var deep = atom.mastersDeep;
         var plan = this._planPull;
@@ -538,7 +518,7 @@ var $jin2_atom = (function (_super) {
         this.schedule();
     };
     $jin2_atom.collect = function (atom) {
-        this._planReap[atom.objectPath] = atom;
+        this._planReap.add(atom);
         this.schedule();
     };
     $jin2_atom.schedule = function () {
@@ -567,23 +547,20 @@ var $jin2_atom = (function (_super) {
                 atom.pull();
             }
             var someReaped = false;
-            for (var atomName in this._planReap) {
-                var atom = this._planReap[atomName];
-                if (!atom)
-                    continue;
+            this._planReap.forEach(function (atom) {
                 someReaped = atom.reap();
-            }
+            });
             if (!someReaped)
                 break;
         }
         clearTimeout(this._timer);
         this._timer = null;
     };
-    $jin2_atom.wait = new Error('Waiting for pulling...');
+    $jin2_atom.wait = new Error('Wait...');
     $jin2_atom.obsolete = new Error('Obsolate state!');
     $jin2_atom.stack = $jin2_state_stack['$jin2_atom_stack'] = [];
     $jin2_atom._planPull = [];
-    $jin2_atom._planReap = {};
+    $jin2_atom._planReap = new Set;
     $jin2_atom._minUpdateDeep = 0;
     return $jin2_atom;
 })($jin2_object);
@@ -641,30 +618,44 @@ var __extends = (this && this.__extends) || function (d, b) {
 var $jin2_view = (function (_super) {
     __extends($jin2_view, _super);
     function $jin2_view() {
-        var _this = this;
         _super.apply(this, arguments);
-        this.tagName = { get: function () { return 'div'; } };
-        this.nameSpace = { get: function () { return 'http://www.w3.org/1999/xhtml'; } };
-        this.child = { get: function () { return null; } };
-        this.attr = { get: function () { return {}; } };
-        this.field = { get: function () { return {}; } };
-        this.event = { get: function () { return {}; } };
-        this.node = { get: function () {
+    }
+    $jin2_view.prototype.tagName = function () {
+        return { get: function () { return 'div'; } };
+    };
+    $jin2_view.prototype.nameSpace = function () {
+        return { get: function () { return 'http://www.w3.org/1999/xhtml'; } };
+    };
+    $jin2_view.prototype.child = function () {
+        return { get: function () { return null; } };
+    };
+    $jin2_view.prototype.attr = function () {
+        return { get: function () { return {}; } };
+    };
+    $jin2_view.prototype.field = function () {
+        return { get: function () { return {}; } };
+    };
+    $jin2_view.prototype.event = function () {
+        return { get: function () { return {}; } };
+    };
+    $jin2_view.prototype.node = function () {
+        var _this = this;
+        return { get: function () {
                 var id = _this.objectPath;
                 var prev = document.getElementById(id);
                 if (!prev) {
-                    prev = document.createElementNS(_this.nameSpace.get(), _this.tagName.get());
+                    prev = document.createElementNS(_this.nameSpace().get(), _this.tagName().get());
                     prev.setAttribute('id', id);
                 }
                 var router = (document.body === prev) ? document : prev;
-                var events = _this.event.get();
+                var events = _this.event().get();
                 for (var name in events)
                     (function (name) {
                         var prop = events[name];
                         router.addEventListener(name, function (event) {
                             if (event.defaultPrevented)
                                 return;
-                            prop.set(event);
+                            prev[prop] = event;
                             $jin2_atom.induce();
                         }, false);
                     })(name);
@@ -678,19 +669,19 @@ var $jin2_view = (function (_super) {
                 }
                 return prev;
             } };
-    }
+    };
     $jin2_view.prototype.pull_ = function (prev) {
         if (!prev)
-            prev = this.node.get();
-        var attrs = this.attr.get();
+            prev = this.node().get();
+        var attrs = this.attr().get();
         for (var name in attrs) {
             var p = prev.getAttribute(name);
-            var n = String(attrs[name].get());
+            var n = String(attrs[name]);
             if (p !== n) {
                 prev.setAttribute(name, n);
             }
         }
-        var childs = this.child.get();
+        var childs = this.child().get();
         if (childs) {
             var childViews = [].concat.apply([], childs);
             var childNodes = prev.childNodes;
@@ -725,7 +716,7 @@ var $jin2_view = (function (_super) {
                 prev.removeChild(currNode);
             }
         }
-        var fields = this.field.get();
+        var fields = this.field().get();
         for (var path in fields) {
             var names = path.split('.');
             var obj = prev;
@@ -738,7 +729,7 @@ var $jin2_view = (function (_super) {
         return prev;
     };
     $jin2_view.prototype.fail_ = function (error) {
-        var node = this.node.get();
+        var node = this.node().get();
         if (error === $jin2_atom.wait) {
             node.setAttribute('jin2_view_error', 'wait');
         }
@@ -794,21 +785,39 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+function extend(obj, inject) {
+    inject(obj);
+    return obj;
+}
 var $jin2_demo_jtt = (function (_super) {
     __extends($jin2_demo_jtt, _super);
     function $jin2_demo_jtt() {
         _super.apply(this, arguments);
-        this.items = new $jin2_atom(function (prev) { return []; });
-        this.child = this.items;
-        this.tagName = { get: function () { return 'ul'; } };
     }
+    $jin2_demo_jtt.widget = function (id) {
+        return new this();
+    };
+    $jin2_demo_jtt.prototype.items = function () {
+        return new $jin2_atom(function (prev) { return []; });
+    };
+    $jin2_demo_jtt.prototype.child = function () {
+        var _this = this;
+        return { get: function () { return _this.items().get(); } };
+    };
+    $jin2_demo_jtt.prototype.tagName = function () {
+        return { get: function () { return 'ul'; } };
+    };
+    $jin2_demo_jtt.prototype.val = function (id) {
+        return new $jin2_atom(function (prev) { return id; });
+    };
     $jin2_demo_jtt.prototype.item = function (id) {
-        var item = new $jin2_demo_jtt_item;
-        item.val.set(id);
-        return item;
+        var _this = this;
+        var next = new $jin2_demo_jtt_item;
+        next.val = function () { return _this.val(id); };
+        return next;
     };
     $jin2_demo_jtt.prototype.doClear = function (done) {
-        this.items.set([]);
+        this.items().set([]);
         $jin2_atom.induce();
         done();
     };
@@ -817,42 +826,58 @@ var $jin2_demo_jtt = (function (_super) {
         for (var i = 0; i < count; i += 1) {
             items.push(this.item(i));
         }
-        this.items.set(items);
+        this.items().set(items);
         $jin2_atom.induce();
         done();
     };
     $jin2_demo_jtt.prototype.doUpdate = function (count, done) {
-        this.items.get().forEach(function (item, index) {
-            item.val.mutate(function (prev) { return prev + ' ' + prev; });
-        });
+        for (var i = 0; i < count; i += 1) {
+            this.val(i).mutate(function (prev) {
+                return prev + ' ' + prev;
+            });
+        }
         $jin2_atom.induce();
         done();
     };
     $jin2_demo_jtt.prototype.doInsert = function (index, done) {
         var _this = this;
-        this.items.mutate(function (prev) {
+        this.items().mutate(function (prev) {
             prev.splice(index, 0, _this.item('xx'));
             return prev;
         });
-        this.items.notify();
+        this.items().notify();
         $jin2_atom.induce();
         done();
     };
-    $jin2_demo_jtt.widget = new $jin2_demo_jtt;
+    __decorate([
+        $jin2_lazy
+    ], $jin2_demo_jtt.prototype, "items", null);
+    __decorate([
+        $jin2_lazy
+    ], $jin2_demo_jtt.prototype, "val", null);
     __decorate([
         $jin2_lazy
     ], $jin2_demo_jtt.prototype, "item", null);
+    __decorate([
+        $jin2_lazy
+    ], $jin2_demo_jtt, "widget", null);
     return $jin2_demo_jtt;
 })($jin2_view);
 var $jin2_demo_jtt_item = (function (_super) {
     __extends($jin2_demo_jtt_item, _super);
     function $jin2_demo_jtt_item() {
-        var _this = this;
         _super.apply(this, arguments);
-        this.val = new $jin2_atom(function (prev) { return '' + _this.objectId; });
-        this.tagName = { get: function () { return 'li'; } };
-        this.child = { get: function () { return ['jj: ' + _this.val.get()]; } };
     }
+    $jin2_demo_jtt_item.prototype.val = function () {
+        return { get: function () { return '{val}'; } };
+    };
+    $jin2_demo_jtt_item.prototype.tagName = function () {
+        return { get: function () { return 'li'; } };
+    };
+    $jin2_demo_jtt_item.prototype.child = function () {
+        var _this = this;
+        return { get: function () { return ['jj: ' + _this.val().get()]; } };
+    };
     return $jin2_demo_jtt_item;
 })($jin2_view);
 //jtt.js.map
