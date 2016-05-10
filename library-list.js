@@ -14,5 +14,6 @@ ENV.libraryList = [
     { code: 'basisjs', name: 'Basis.js', path: './basisjs/index.html' },
     { code: 'ractivejs', name: 'Ractive.js', path: './ractivejs/index.html' },    
     { code: 'reactjs', name: 'React.js', path: './reactjs/index.html' },
-    { code: 'blocksjs', name: 'Blocks.js', path: './blocksjs/index.html' }
+    { code: 'blocksjs', name: 'Blocks.js', path: './blocksjs/index.html' },
+    { code: 'vuejs', name: 'Vue.js', path: './vuejs/index.html' },
 ];
