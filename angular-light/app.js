@@ -1,11 +1,10 @@
+alight.ctrl.main = function(scope) {
+    scope.items = [];
 
-alight.directives.ctrl.main = function(changeDetector) {
-    var scope = changeDetector.scope;
     function redraw() {
-        changeDetector.scan()
+        scope.$scan();
     }
 
-    scope.items = [];
     function clear(callback) {
         scope.items = [];
         redraw();

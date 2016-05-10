@@ -1,7 +1,7 @@
 if(!window.ENV) window.ENV = {};
 
 ENV.libraryList = [
-    { code: 'angular-light', name: 'Angular Light', path: './angular-light/index.html' },
+    { code: 'angular-light', name: 'Angular Light 0.12', path: './angular-light/index.html' },
     { code: 'angularjs', name: 'Angular.js', path: './angularjs/index.html' },
     { code: 'angularjs2', name: 'Angular.js 2', path: './angularjs2/index.html' },
     { code: 'jquery', name: 'jQuery', path: './jquery/index.html' },
