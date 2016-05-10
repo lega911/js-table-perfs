@@ -1,0 +1,39 @@
+<app>
+    <ul id="app">
+        <li each={ items }>jj: { t }</li>
+    </ul>
+
+    <script>
+        app = opts;
+        this.items = [];
+
+        app.on('clear', function(){
+           this.items = [];
+           this.update();
+        }.bind(this));
+
+        app.on('fill', function(n){
+            var i;
+            for (i = 0; i < n; i += 1) {
+                this.items.push({ t:i });
+            }
+            this.update();
+        }.bind(this));
+
+        app.on('update', function(n){
+            var i,
+                    items = this.items;
+            for (i = 0; i < n; i += 1) {
+                this.items[i].t += ' ' + this.items[i].t;
+            }
+            this.update();
+        }.bind(this));
+
+        app.on('insert', function(n){
+            this.items.splice(n, 0, { t: 'xx' });
+            this.update();
+        }.bind(this));
+
+
+    </script>
+</app>
