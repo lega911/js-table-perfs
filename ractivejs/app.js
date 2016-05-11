@@ -1,4 +1,4 @@
-$(function() {
+(function() {
     var ractive;
     
     ractive = new Ractive({
@@ -8,8 +8,7 @@ $(function() {
     });
     
     function clear(callback) {
-        ractive.data.list.length = 0;
-        ractive.update('list');
+        ractive.set('list', []);
         callback()
     };
   
@@ -18,24 +17,31 @@ $(function() {
         for (var i = 0; i < n; i++) {
             tmp.push({ t:i })
         };
-        ractive.data.list = tmp;
-        ractive.update('list');
+        ractive.set('list', tmp);
         callback()
     };
     
     function update(n, callback) {
+        var list = ractive.get('list');
         for (var i = 0; i < n; i++) {
-            ractive.data.list[i].t = i+' '+i
+            list[i].t = i+' '+i;
         }
-        ractive.update('list');
+        ractive.set('list', list);
         callback()
     };
+
+    function insert(n, callback) {
+        var list = ractive.get('list');
+        list.splice(n, 0, {t: 'XX'});
+        callback();
+    }
 
     ENV.append({
         code: 'ractivejs',
         clear: clear,
         fill: fill,
-        update: update
+        update: update,
+        insert: insert,
     });
 
-});
+})();
